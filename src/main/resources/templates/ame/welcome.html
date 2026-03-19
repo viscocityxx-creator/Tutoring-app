@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/ame.css}">
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div>
+            <div class="brand">AME</div>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/how-it-works}">How It Works</a>
+            <a class="btn" th:href="${loggedIn} ? @{/upload} : @{/auth}" th:text="${loggedIn} ? 'Continue' : 'Get Started'"></a>
+        </div>
+    </header>
+
+    <section class="hero-main panel">
+        <h1>Academic Support That <span class="accent-word">Works</span></h1>
+        <p class="muted">Upload your assignment and receive structured, guided solutions designed to help you understand and improve.</p>
+        <div class="actions" style="justify-content:center;">
+            <a class="btn" th:href="${loggedIn} ? @{/upload} : @{/auth}" th:text="${loggedIn} ? 'Upload Assignment' : 'Get Started'"></a>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>How It Works</h2>
+        <div class="card-row">
+            <div class="panel"><h3>1. Upload</h3></div>
+            <div class="panel"><h3>2. Analyze</h3></div>
+            <div class="panel"><h3>3. Guided Solution</h3></div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
+

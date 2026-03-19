@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Step 2 - AME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/ame.css}">
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div>
+            <div class="brand">AME Upload Workspace</div>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/upload}">Back to Step 1</a>
+            <a class="btn ghost" th:href="@{/history}">History</a>
+            <form th:action="@{/auth/logout}" method="post">
+                <button class="ghost" type="submit">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+    <div th:if="${success}" class="alert success" th:text="${success}"></div>
+
+    <section class="progress">
+        <div class="step done"><strong>1.</strong> Profile</div>
+        <div class="step active"><strong>2.</strong> Content</div>
+        <div class="step"><strong>3.</strong> Analyze</div>
+        <div class="step"><strong>4.</strong> Pay & Deliver</div>
+    </section>
+
+    <section class="panel">
+        <h1>Content and files</h1>
+        <form th:action="@{/analyze}" method="post" enctype="multipart/form-data">
+            <div class="grid-2">
+                <label>
+                    Word count (writing-focused categories)
+                    <input id="wordCount" name="wordCount" type="number" min="0" value="0" th:value="${meta.category.name() == 'WRITING' || meta.category.name() == 'RESEARCH' || meta.category.name() == 'THESIS' || meta.category.name() == 'COLLEGE_APPLICATION' ? 500 : 0}">
+                </label>
+                <label class="tiny">
+                    <input name="inDepthExplanation" type="checkbox" value="true">
+                    Include in-depth explanation
+                </label>
+            </div>
+            <label>
+                Assignment brief / instruction
+                <textarea name="prompt" placeholder="Paste exact instructions here..." required></textarea>
+            </label>
+            <label>
+                Upload files (bundle max 5MB)
+                <input name="files" id="fileInput" type="file" multiple required style="display:none;">
+                <div class="dropzone" id="dropzone">
+                    <strong>Drag files here</strong> or click to choose files.
+                </div>
+                <div class="helper" id="fileInfo">No files selected.</div>
+                <div class="meter"><span id="fileMeter"></span></div>
+            </label>
+            <label class="tiny">
+                <input type="checkbox" required>
+                I confirm this is not a live exam or timed assessment.
+            </label>
+            <button type="submit">Analyze Assignment</button>
+        </form>
+    </section>
+</main>
+
+<aside id="pricePop" class="price-pop" aria-live="polite">
+    <div class="row">
+        <strong>Live Price</strong>
+        <button class="ghost" id="closePop" type="button">x</button>
+    </div>
+    <div class="value" id="priceValue">NGN 200.00</div>
+    <div class="tiny muted">Estimated preview</div>
+</aside>
+
+<script>
+  const fileInput = document.getElementById("fileInput");
+  const dropzone = document.getElementById("dropzone");
+  const fileInfo = document.getElementById("fileInfo");
+  const fileMeter = document.getElementById("fileMeter");
+  const wordCount = document.getElementById("wordCount");
+  const inDepth = document.querySelector('input[name="inDepthExplanation"]');
+  const pricePop = document.getElementById("pricePop");
+  const priceValue = document.getElementById("priceValue");
+  const closePop = document.getElementById("closePop");
+  const category = "[[${meta.category.name()}]]";
+  let popTimer;
+
+  function isWritingLike() {
+    return ["WRITING", "RESEARCH", "THESIS", "COLLEGE_APPLICATION"].includes(category);
+  }
+
+  function cecMultiplier() {
+    if (!isWritingLike()) return 1.0;
+    const wc = parseInt(wordCount.value || "0", 10);
+    if (wc <= 250) return 1.6;
+    if (wc <= 500) return 1.8;
+    if (wc <= 800) return 2.0;
+    if (wc <= 1500) return 2.5;
+    return 3.5;
+  }
+
+  function academicMultiplier() {
+    const level = "[[${meta.academicLevel.name()}]]";
+    if (level === "HIGH_SCHOOL") return 1.1;
+    if (level === "UNIVERSITY") return 1.5;
+    return 3.0;
+  }
+
+  function showPricePopup() {
+    const baseNgn = 200;
+    const I = 1.8;
+    const U = 1.0;
+    let total = baseNgn * cecMultiplier() * academicMultiplier() * I * U;
+    if (category === "COLLEGE_APPLICATION") total *= 2.0;
+    if (inDepth.checked) total *= 1.5;
+    priceValue.textContent = "NGN " + total.toFixed(2);
+    pricePop.classList.add("show");
+    clearTimeout(popTimer);
+    popTimer = setTimeout(() => pricePop.classList.remove("show"), 2800);
+  }
+
+  function updateFiles() {
+    const files = Array.from(fileInput.files || []);
+    const total = files.reduce((n, f) => n + f.size, 0);
+    const max = 5 * 1024 * 1024;
+    const pct = Math.min(100, (total / max) * 100);
+    fileMeter.style.width = pct.toFixed(1) + "%";
+    fileInfo.textContent = files.length === 0
+      ? "No files selected."
+      : `${files.length} file(s), ${(total / (1024 * 1024)).toFixed(2)}MB / 5.00MB`;
+    fileInfo.style.color = total > max ? "#ff7d8a" : "";
+  }
+
+  dropzone.addEventListener("click", () => fileInput.click());
+  dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
+  dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    fileInput.files = e.dataTransfer.files;
+    updateFiles();
+  });
+  fileInput.addEventListener("change", updateFiles);
+  if (wordCount) {
+    wordCount.addEventListener("input", showPricePopup);
+    wordCount.addEventListener("change", showPricePopup);
+  }
+  if (inDepth) {
+    inDepth.addEventListener("change", showPricePopup);
+  }
+  closePop.addEventListener("click", () => pricePop.classList.remove("show"));
+  showPricePopup();
+</script>
+</body>
+</html>
+

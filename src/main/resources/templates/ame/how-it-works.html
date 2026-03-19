@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works - AME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/ame.css}">
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div><div class="brand">How AME Works</div></div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/}">Home</a>
+            <a class="btn" th:href="${loggedIn} ? @{/upload} : @{/auth}" th:text="${loggedIn} ? 'Upload Assignment' : 'Get Started'"></a>
+        </div>
+    </header>
+
+    <section class="panel">
+        <h2>Simple flow</h2>
+        <div class="progress">
+            <div class="step active"><strong>1.</strong> Upload assignment</div>
+            <div class="step active"><strong>2.</strong> We analyze complexity + price</div>
+            <div class="step active"><strong>3.</strong> You pay securely</div>
+            <div class="step active"><strong>4.</strong> You receive guided output</div>
+        </div>
+    </section>
+
+    <section class="grid-2">
+        <article class="panel">
+            <h3>What you get</h3>
+        </article>
+        <article class="panel">
+            <h3>Integrity notice</h3>
+        </article>
+    </section>
+</main>
+</body>
+</html>
+

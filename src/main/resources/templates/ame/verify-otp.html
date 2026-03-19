@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - AME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/ame.css}">
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div>
+            <div class="brand">Verify One-Time Passcode</div>
+            <div class="tiny muted">Step 2 of 2 account creation</div>
+        </div>
+        <a class="btn ghost" th:href="@{/auth}">Back to Auth</a>
+    </header>
+
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+    <div th:if="${success}" class="alert success" th:text="${success}"></div>
+
+    <section class="panel">
+        <h2>OTP Verification</h2>
+        <p class="tiny muted">Email: <strong th:text="${pendingEmail}">example@email.com</strong></p>
+        <p class="tiny muted">Expires at: <span th:text="${expiresAt}">--</span></p>
+        <form th:action="@{/auth/verify}" method="post" class="grid-2">
+            <label>
+                Enter 6-digit OTP
+                <input name="otp" maxlength="6" minlength="6" pattern="[0-9]{6}" required placeholder="123456">
+            </label>
+            <div style="display:flex; gap:0.6rem; align-items:end;">
+                <button type="submit">Verify and create account</button>
+            </div>
+        </form>
+        <form th:action="@{/auth/resend-otp}" method="post" style="margin-top:0.8rem;">
+            <button class="ghost" type="submit">Resend OTP</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
+

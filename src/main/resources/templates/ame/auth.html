@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - AME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/ame.css}">
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div>
+            <div class="brand">AME</div>
+        </div>
+        <a class="btn ghost" th:href="@{/}">Back Home</a>
+    </header>
+
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+    <div th:if="${success}" class="alert success" th:text="${success}"></div>
+
+    <section class="auth-shell">
+        <article class="auth-hero">
+            <h1>Get Started with AME</h1>
+            <p class="muted">Create your account once, verify with OTP, and continue your assignments with a smoother flow.</p>
+            <div class="auth-badges">
+                <span class="auth-badge">Step 1: Create account</span>
+                <span class="auth-badge">Step 2: Verify OTP</span>
+                <span class="auth-badge">Step 3: Upload</span>
+            </div>
+        </article>
+
+        <div class="auth-forms">
+            <form th:action="@{/auth/signup}" method="post" class="auth-card">
+                <h2>Create account</h2>
+                <p class="muted tiny">New here? Start with your details.</p>
+                <input name="displayName" placeholder="Display name" required>
+                <input name="email" type="email" placeholder="Email" required>
+                <input name="password" type="password" placeholder="Password (min 6 chars)" required>
+                <button type="submit">Send OTP</button>
+                <p><a th:href="@{/auth/verify}">Already got a code? Verify here.</a></p>
+            </form>
+
+            <form th:action="@{/auth/login}" method="post" class="auth-card">
+                <h2>Log in</h2>
+                <p class="muted tiny">Welcome back.</p>
+                <input name="email" type="email" placeholder="Email" required>
+                <input name="password" type="password" placeholder="Password" required>
+                <button type="submit">Log in</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>
+

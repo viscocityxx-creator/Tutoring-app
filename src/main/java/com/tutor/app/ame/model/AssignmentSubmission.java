@@ -84,6 +84,9 @@ public class AssignmentSubmission {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalUsd;
 
+    @Column(precision = 12, scale = 2)
+    private BigDecimal totalNgn;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalLocal;
 
@@ -278,6 +281,14 @@ public class AssignmentSubmission {
 
     public void setTotalUsd(BigDecimal totalUsd) {
         this.totalUsd = totalUsd;
+    }
+
+    public BigDecimal getTotalNgn() {
+        return totalNgn;
+    }
+
+    public void setTotalNgn(BigDecimal totalNgn) {
+        this.totalNgn = totalNgn;
     }
 
     public BigDecimal getTotalLocal() {

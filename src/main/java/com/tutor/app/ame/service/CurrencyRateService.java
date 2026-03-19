@@ -31,6 +31,27 @@ public class CurrencyRateService {
         return cache.getOrDefault(currencyCode.toUpperCase(), FALLBACK_RATE);
     }
 
+    public BigDecimal convert(BigDecimal amount, String fromCurrency, String toCurrency) {
+        tryRefreshRates();
+        String from = fromCurrency.toUpperCase();
+        String to = toCurrency.toUpperCase();
+        if (from.equals(to)) {
+            return amount.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal fromRate = cache.getOrDefault(from, FALLBACK_RATE);
+        BigDecimal toRate = cache.getOrDefault(to, FALLBACK_RATE);
+        if (fromRate.compareTo(BigDecimal.ZERO) <= 0) {
+            fromRate = FALLBACK_RATE;
+        }
+        if (toRate.compareTo(BigDecimal.ZERO) <= 0) {
+            toRate = FALLBACK_RATE;
+        }
+
+        BigDecimal inUsd = amount.divide(fromRate, 8, RoundingMode.HALF_UP);
+        return inUsd.multiply(toRate).setScale(2, RoundingMode.HALF_UP);
+    }
+
     private synchronized void tryRefreshRates() {
         if (Instant.now().isBefore(cacheExpiresAt) && !cache.isEmpty()) {
             return;

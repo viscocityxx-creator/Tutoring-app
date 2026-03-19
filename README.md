@@ -7,20 +7,21 @@ AME is a Spring Boot web app focused on guided solutions, feedback, editing, and
 - Upload assignment bundle (max 5MB total)
 - Country restriction to selected African countries
 - AI-like category detection + mismatch handling per assignment
-- Measurable readability check (score threshold 0.80)
+- Measurable readability check (score threshold 0.10)
 - AI difficulty index `[I]` on 1-3 (rounded to hundredth)
 - Re-evaluated difficulty `[i]` on 1-12
 - Time prediction flow constrained to 2 hours - 7 days
 - Urgency constant `U` with bounds check `[0.4, 30.5]`
-- Local currency display + USD internal pricing using live FX API
+- Base pricing in NGN + local currency display + USD settlement using live FX API
 - Payment step page (Stripe links provided; demo payment action included)
+- Email OTP verification with SendGrid for account creation
 - History page + recent downloads + discourse reviews
 - Unlimited-assignment progress tracker
 
 ## Core formulas in app
 - `Time needed = 2 + ((i / 12) ^ 166) * 166` then rounded to nearest 6 hours (2-hour exception)
 - `Total Cost = Base_Price * CEC * AL * I * U`
-- `Base_Price = 200`
+- `Base_Price = NGN 200`
 - `College Application multiplier = 2`
 - `In-depth explanation multiplier = 1.5`
 - `U = 0.5 * predicted_hours / user_required_hours` when user objects to default
@@ -32,6 +33,12 @@ gradle bootRun
 
 Open:
 - `http://localhost:8080`
+
+## SendGrid OTP configuration
+Set these environment variables before running/deploying:
+- `SENDGRID_API_KEY`
+- `AME_OTP_FROM_EMAIL`
+- Optional: `AME_OTP_FROM_NAME` (default: `AME App`)
 
 ## Stripe setup docs
 - [Accept a payment on web](https://stripe.com/docs/payments/accept-a-payment?platform=web)

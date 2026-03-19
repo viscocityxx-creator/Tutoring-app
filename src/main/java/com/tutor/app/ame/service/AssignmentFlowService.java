@@ -25,7 +25,7 @@ import java.util.Map;
 @Service
 public class AssignmentFlowService {
 
-    private static final BigDecimal BASE_PRICE = new BigDecimal("200");
+    private static final BigDecimal BASE_PRICE_NGN = new BigDecimal("200");
     private static final List<Integer> DELIVERY_OPTIONS_HOURS = List.of(
             2, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 96, 120, 144, 168
     );
@@ -71,8 +71,8 @@ public class AssignmentFlowService {
         }
 
         BigDecimal readability = readabilityScore(files);
-        if (readability.compareTo(new BigDecimal("0.80")) < 0) {
-            throw new IllegalArgumentException("The upload is below 80% readability. Please re-upload clearer files.");
+        if (readability.compareTo(new BigDecimal("0.10")) < 0) {
+            throw new IllegalArgumentException("The upload is below 10% readability. Please re-upload clearer files.");
         }
 
         BigDecimal difficultyIndex = calculateDifficultyIndex(input, files, finalCategory);
@@ -118,21 +118,22 @@ public class AssignmentFlowService {
 
         BigDecimal cec = cecMultiplier(input.wordCount(), quote.finalCategory());
         BigDecimal level = levelMultiplier(input.academicLevel());
-        BigDecimal totalUsd = BASE_PRICE
+        BigDecimal totalNgn = BASE_PRICE_NGN
                 .multiply(cec)
                 .multiply(level)
                 .multiply(quote.difficultyIndex())
                 .multiply(urgencyConstant);
         if (quote.finalCategory() == AssignmentCategory.COLLEGE_APPLICATION) {
-            totalUsd = totalUsd.multiply(new BigDecimal("2.0"));
+            totalNgn = totalNgn.multiply(new BigDecimal("2.0"));
         }
         if (input.inDepthExplanation()) {
-            totalUsd = totalUsd.multiply(new BigDecimal("1.5"));
+            totalNgn = totalNgn.multiply(new BigDecimal("1.5"));
         }
-        totalUsd = totalUsd.setScale(2, RoundingMode.HALF_UP);
+        totalNgn = totalNgn.setScale(2, RoundingMode.HALF_UP);
 
+        BigDecimal totalUsd = currencyRateService.convert(totalNgn, "NGN", "USD");
+        BigDecimal localAmount = currencyRateService.convert(totalNgn, "NGN", quote.country().currencyCode());
         BigDecimal fxRate = currencyRateService.usdTo(quote.country().currencyCode());
-        BigDecimal localAmount = totalUsd.multiply(fxRate).setScale(2, RoundingMode.HALF_UP);
 
         AssignmentSubmission submission = new AssignmentSubmission();
         submission.setDraftId(input.draftId());
@@ -155,6 +156,7 @@ public class AssignmentFlowService {
         submission.setRequiredHours(requiredHours);
         submission.setUrgencyConstant(urgencyConstant);
         submission.setTotalUsd(totalUsd);
+        submission.setTotalNgn(totalNgn);
         submission.setUsdToLocalRate(fxRate);
         submission.setTotalLocal(localAmount);
         submission.setCreatedAt(Instant.now());
@@ -381,7 +383,7 @@ public class AssignmentFlowService {
         sb.append("2) Feedback section showing areas to improve before submission.\n");
         sb.append("3) Editing notes and clarity upgrades for your draft.\n");
         if (submission.isInDepthExplanation()) {
-            sb.append("\nFirst-Principles + Feynman-style explanation is included at the end.\n");
+            sb.append("\nDetailed explanation is included.\n");
         }
         sb.append("\nEthical use notice: Adapt this content to your own voice and institutional policy.");
         return sb.toString();

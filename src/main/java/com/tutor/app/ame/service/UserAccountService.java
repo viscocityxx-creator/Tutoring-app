@@ -18,12 +18,7 @@ public class UserAccountService {
     }
 
     public AppUser register(String displayName, String email, String rawPassword) {
-        if (appUserRepository.findByEmailIgnoreCase(email).isPresent()) {
-            throw new IllegalArgumentException("An account with this email already exists.");
-        }
-        if (rawPassword.length() < 6) {
-            throw new IllegalArgumentException("Password must be at least 6 characters.");
-        }
+        validateSignupInput(displayName, email, rawPassword);
         AppUser user = new AppUser();
         user.setDisplayName(displayName.trim());
         user.setEmail(email.trim().toLowerCase());
@@ -34,5 +29,20 @@ public class UserAccountService {
     public Optional<AppUser> login(String email, String rawPassword) {
         return appUserRepository.findByEmailIgnoreCase(email)
                 .filter(user -> passwordEncoder.matches(rawPassword, user.getPasswordHash()));
+    }
+
+    public void validateSignupInput(String displayName, String email, String rawPassword) {
+        if (displayName == null || displayName.isBlank()) {
+            throw new IllegalArgumentException("Display name is required.");
+        }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email is required.");
+        }
+        if (appUserRepository.findByEmailIgnoreCase(email).isPresent()) {
+            throw new IllegalArgumentException("An account with this email already exists.");
+        }
+        if (rawPassword == null || rawPassword.length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters.");
+        }
     }
 }
