@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutoring App</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+<main class="container">
+    <h1>Tutoring App</h1>
+    <p class="subtitle">Manage tutors, students, and lesson bookings in one place.</p>
+
+    <section class="cards">
+        <article class="card">
+            <h2 th:text="${tutorCount}">0</h2>
+            <p>Tutors</p>
+        </article>
+        <article class="card">
+            <h2 th:text="${studentCount}">0</h2>
+            <p>Students</p>
+        </article>
+        <article class="card">
+            <h2 th:text="${scheduledCount}">0</h2>
+            <p>Scheduled Sessions</p>
+        </article>
+    </section>
+
+    <nav class="nav">
+        <a th:href="@{/tutors}">Tutors</a>
+        <a th:href="@{/students}">Students</a>
+        <a th:href="@{/sessions}">Sessions</a>
+        <a th:href="@{/h2-console}" target="_blank" rel="noopener noreferrer">H2 Console</a>
+    </nav>
+</main>
+</body>
+</html>

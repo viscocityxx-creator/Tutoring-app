@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+<main class="container">
+    <a class="back" th:href="@{/}">Home</a>
+    <h1>Students</h1>
+
+    <div th:if="${success}" class="alert success" th:text="${success}"></div>
+
+    <section class="panel">
+        <h2>Add Student</h2>
+        <form method="post" th:action="@{/students}" class="grid">
+            <input name="name" placeholder="Name" required>
+            <input name="email" type="email" placeholder="Email" required>
+            <input name="goal" placeholder="Learning Goal" required>
+            <button type="submit">Create Student</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>All Students</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Goal</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="student : ${students}">
+                <td th:text="${student.name}"></td>
+                <td th:text="${student.email}"></td>
+                <td th:text="${student.goal}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutors</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+<main class="container">
+    <a class="back" th:href="@{/}">Home</a>
+    <h1>Tutors</h1>
+
+    <div th:if="${success}" class="alert success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+
+    <section class="panel">
+        <h2>Add Tutor</h2>
+        <form method="post" th:action="@{/tutors}" class="grid">
+            <input name="name" placeholder="Name" required>
+            <input name="email" type="email" placeholder="Email" required>
+            <input name="hourlyRate" type="number" step="0.01" placeholder="Hourly Rate" required>
+            <input name="bio" placeholder="Bio" required>
+            <input name="subjectsCsv" placeholder="Subjects (e.g. MATH, SCIENCE)" required>
+            <button type="submit">Create Tutor</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>All Tutors</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Rate</th>
+                <th>Subjects</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="tutor : ${tutors}">
+                <td th:text="${tutor.name}"></td>
+                <td th:text="${tutor.email}"></td>
+                <td th:text="'$' + ${tutor.hourlyRate}"></td>
+                <td th:text="${tutor.subjects}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>
