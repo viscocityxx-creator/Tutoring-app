@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - AME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/ame.css}">
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div>
+            <div class="brand">History & Recent Work</div>
+            <div class="tiny muted">Track delivery, download files, rate your experience.</div>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/}">New upload</a>
+            <a class="btn ghost" th:href="@{/discourse}">Discourse</a>
+        </div>
+    </header>
+    <section class="progress">
+        <div class="step done"><strong>1.</strong> Upload</div>
+        <div class="step done"><strong>2.</strong> Analyze</div>
+        <div class="step done"><strong>3.</strong> Pay</div>
+        <div class="step active"><strong>4.</strong> Deliver</div>
+    </section>
+
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+    <div th:if="${success}" class="alert success" th:text="${success}"></div>
+
+    <section class="panel">
+        <h3>Unlimited assignment progress</h3>
+        <p class="tiny muted">Did you know you can get unlimited assignments after a certain number of uploads? So what are you waiting for?</p>
+        <p th:text="${remainingForUnlimited == 0 ? 'You are eligible to apply for unlimited subscription.' : remainingForUnlimited + ' more upload(s) to reach eligibility.'}"></p>
+    </section>
+
+    <section class="panel">
+        <h2>All submissions</h2>
+        <div th:if="${#lists.isEmpty(history)}" class="empty">
+            <p>No uploads yet.</p>
+            <p class="tiny">Start your first guided solution request from the home page.</p>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Delivery (local time)</th>
+                <th>Amount</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${history}">
+                <td th:text="${row.id}"></td>
+                <td>
+                    <div th:text="${row.subject}"></div>
+                    <span class="chip" th:text="${row.detectedCategory}"></span>
+                </td>
+                <td th:text="${row.status}"></td>
+                <td>
+                    <div th:text="${timeFormatter.formatUserTime(row)}"></div>
+                    <div class="countdown" th:attr="data-target=${row.expectedDeliveryUtc}" th:if="${row.status.name() != 'DELIVERED'}">Counting down...</div>
+                </td>
+                <td th:text="${row.currencyCode + ' ' + row.totalLocal}"></td>
+                <td>
+                    <a class="btn ghost" th:href="@{'/download/' + ${row.id}}">Download</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Optional review after delivery</h2>
+        <div th:each="row : ${recent}" class="panel">
+            <h3 th:text="${'Submission #' + row.id + ' - ' + row.subject}"></h3>
+            <p class="tiny muted" th:if="${row.review != null && !row.review.isBlank()}">You already left feedback for this work.</p>
+            <form th:if="${row.review == null || row.review.isBlank()}" th:action="@{'/review/' + ${row.id}}" method="post">
+                <div class="grid-2">
+                    <label>
+                        Rating (1-5)
+                        <input name="rating" type="number" min="1" max="5" required>
+                    </label>
+                    <label>
+                        Feedback (optional)
+                        <input name="review" placeholder="What can we improve?">
+                    </label>
+                </div>
+                <button type="submit">Submit review</button>
+            </form>
+        </div>
+    </section>
+</main>
+<script>
+  function formatDelta(ms) {
+    if (ms <= 0) return "Due now";
+    const totalSec = Math.floor(ms / 1000);
+    const d = Math.floor(totalSec / 86400);
+    const h = Math.floor((totalSec % 86400) / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    if (d > 0) return `${d}d ${h}h ${m}m left`;
+    return `${h}h ${m}m left`;
+  }
+
+  function tick() {
+    document.querySelectorAll(".countdown").forEach(el => {
+      const target = new Date(el.dataset.target).getTime();
+      el.textContent = formatDelta(target - Date.now());
+    });
+  }
+  tick();
+  setInterval(tick, 30000);
+</script>
+</body>
+</html>

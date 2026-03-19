@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AME App - Guided Academic Support</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/ame.css}">
+</head>
+<body>
+<main class="page">
+    <header class="topbar">
+        <div>
+            <div class="brand">AME App</div>
+            <div class="tiny muted">Guided solutions, feedback, editing, explanations</div>
+        </div>
+        <div class="actions">
+            <a class="btn ghost" th:href="@{/history}" th:if="${loggedIn}">History</a>
+            <a class="btn ghost" th:href="@{/discourse}" th:if="${loggedIn}">Discourse</a>
+            <span class="tag">Regions restricted</span>
+        </div>
+    </header>
+
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+    <div th:if="${success}" class="alert success" th:text="${success}"></div>
+    <section class="progress">
+        <div class="step active"><strong>1.</strong> Upload</div>
+        <div class="step"><strong>2.</strong> Analyze</div>
+        <div class="step"><strong>3.</strong> Pay</div>
+        <div class="step"><strong>4.</strong> Deliver</div>
+    </section>
+
+    <section class="hero">
+        <article class="panel">
+            <h1>Expert assignment support in 2 hours to 7 days.</h1>
+            <p class="muted">Upload your work, get a transparent estimate, pay securely, then receive guided educational output at the promised time.</p>
+            <div class="card-row">
+                <div class="panel">
+                    <h3>Upload</h3>
+                    <p class="tiny muted">PDF, DOCX, PPT/PPTX, images, TXT. Bundle max 5MB.</p>
+                </div>
+                <div class="panel">
+                    <h3>Analyze</h3>
+                    <p class="tiny muted">Difficulty index, readability check, price, and delivery window.</p>
+                </div>
+                <div class="panel">
+                    <h3>Deliver</h3>
+                    <p class="tiny muted">UTC storage, your local-time display, structured guided answers.</p>
+                </div>
+            </div>
+        </article>
+        <aside class="panel">
+            <h2>Design Language</h2>
+            <p class="muted tiny">STEM + humanities cues, with deliberate texture and asymmetry.</p>
+            <div class="symbols">
+                <div class="symbol-card">π</div>
+                <div class="symbol-card">Σ</div>
+                <div class="symbol-card">Δ</div>
+                <div class="symbol-card">∞</div>
+                <div class="symbol-card">∂</div>
+                <div class="symbol-card">λ</div>
+                <div class="symbol-card">∫</div>
+                <div class="symbol-card">ψ</div>
+            </div>
+        </aside>
+    </section>
+
+    <section class="panel" th:if="${!loggedIn}">
+        <h2>Step 1: Create account or login</h2>
+        <div class="grid-2">
+            <form th:action="@{/auth/signup}" method="post" class="panel">
+                <h3>Sign up</h3>
+                <input name="displayName" placeholder="Display name" required>
+                <input name="email" type="email" placeholder="Email" required>
+                <input name="password" type="password" placeholder="Password (min 6 chars)" required>
+                <button type="submit">Create account</button>
+            </form>
+            <form th:action="@{/auth/login}" method="post" class="panel">
+                <h3>Log in</h3>
+                <input name="email" type="email" placeholder="Email" required>
+                <input name="password" type="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="panel" th:if="${loggedIn}">
+        <div class="grid-2">
+            <div>
+                <h2>Welcome, <span th:text="${userName}">User</span></h2>
+                <p class="muted tiny">Integrity-first support only: no live exams, no impersonation.</p>
+            </div>
+            <form th:action="@{/auth/logout}" method="post" style="text-align:right">
+                <button class="ghost" type="submit">Logout</button>
+            </form>
+        </div>
+
+        <h2>Step 2: Upload assignment</h2>
+        <form th:action="@{/analyze}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="draftId" th:value="${draftId}">
+            <input type="hidden" name="userTimezone" id="userTimezone">
+            <div class="grid-3">
+                <label>
+                    Country
+                    <select name="country" id="countrySelect" required>
+                        <option value="">Select country</option>
+                        <option th:each="country : ${countries}" th:value="${country.name}" th:text="${country.name + ' (' + country.currencyCode + ')'}"></option>
+                    </select>
+                    <div class="helper">Restricted service region only.</div>
+                </label>
+                <label>
+                    Category
+                    <select name="category" id="categorySelect" required>
+                        <option th:each="category : ${categories}" th:value="${category}" th:text="${category}"></option>
+                    </select>
+                    <div class="helper">If mismatched twice, the app auto-corrects category for this assignment.</div>
+                </label>
+                <label>
+                    Academic level
+                    <select name="academicLevel" required>
+                        <option th:each="level : ${levels}" th:value="${level}" th:text="${level}"></option>
+                    </select>
+                    <div class="helper">Used directly in pricing formula.</div>
+                </label>
+            </div>
+            <div style="margin:0.5rem 0 0.8rem;">
+                <button class="ghost" type="button" id="detectBtn">Use my current country/timezone</button>
+            </div>
+            <div class="grid-2">
+                <label>
+                    Subject
+                    <input name="subject" placeholder="e.g. Organic Chemistry, Comparative Literature" required>
+                    <div class="helper">Clear subject naming helps detection quality.</div>
+                </label>
+                <label>
+                    Word count (only for writing-focused requests)
+                    <input id="wordCount" name="wordCount" type="number" min="0" value="0" disabled>
+                    <div class="helper">Enabled for writing/research/thesis/college applications.</div>
+                </label>
+            </div>
+            <label>
+                Assignment brief / instructions
+                <textarea name="prompt" placeholder="Paste assignment instruction details here." required></textarea>
+                <div class="helper">Add constraints, rubrics, formatting rules, and expected outcomes.</div>
+            </label>
+            <div class="grid-2">
+                <label>
+                    Upload files (bundle max 5MB)
+                    <input name="files" id="fileInput" type="file" multiple required style="display:none;">
+                    <div class="dropzone" id="dropzone">
+                        <strong>Drag files here</strong> or click to pick files.
+                        <div class="tiny muted">Accepted: PDF, DOCX, PPT/PPTX, JPG, PNG, TXT</div>
+                    </div>
+                    <div class="helper" id="fileInfo">No files selected.</div>
+                    <div class="meter"><span id="fileMeter"></span></div>
+                </label>
+                <label class="tiny">
+                    <input name="inDepthExplanation" type="checkbox" value="true">
+                    Include in-depth explanation (First Principles + Feynman style at the end)
+                    <div class="helper">Adds multiplier 1.5 to final price.</div>
+                </label>
+            </div>
+            <label class="tiny">
+                <input type="checkbox" required>
+                I confirm this is not a live exam or timed assessment.
+            </label>
+            <div class="panel">
+                <h3>Live estimate preview</h3>
+                <p class="tiny muted" id="previewText">Approx. USD total updates as you edit this form (final value set after AI analysis).</p>
+                <div id="previewUsd">$0.00</div>
+            </div>
+            <button type="submit">Analyze Assignment</button>
+        </form>
+    </section>
+
+    <p class="footer-note">
+        Stripe setup guide:
+        <a href="https://stripe.com/docs/payments/accept-a-payment?platform=web" target="_blank" rel="noopener">Accept a payment on web</a>.
+    </p>
+</main>
+<script>
+  document.getElementById("userTimezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const writingCategories = ["WRITING", "RESEARCH", "THESIS", "COLLEGE_APPLICATION"];
+  const categorySelect = document.getElementById("categorySelect");
+  const wordCount = document.getElementById("wordCount");
+  const academicSelect = document.querySelector('select[name="academicLevel"]');
+  const inDepth = document.querySelector('input[name="inDepthExplanation"]');
+  const previewUsd = document.getElementById("previewUsd");
+  const fileInput = document.getElementById("fileInput");
+  const dropzone = document.getElementById("dropzone");
+  const fileInfo = document.getElementById("fileInfo");
+  const fileMeter = document.getElementById("fileMeter");
+  const countrySelect = document.getElementById("countrySelect");
+  const detectBtn = document.getElementById("detectBtn");
+
+  function toggleWordCount() {
+    const active = writingCategories.includes(categorySelect.value);
+    wordCount.disabled = !active;
+    if (!active) {
+      wordCount.value = 0;
+    } else if (wordCount.value === "0") {
+      wordCount.value = 500;
+    }
+  }
+
+  if (categorySelect) {
+    categorySelect.addEventListener("change", toggleWordCount);
+    toggleWordCount();
+  }
+
+  function cecMultiplier() {
+    if (!categorySelect || !wordCount) return 1.0;
+    if (!writingCategories.includes(categorySelect.value)) return 1.0;
+    const wc = parseInt(wordCount.value || "0", 10);
+    if (wc <= 250) return 1.6;
+    if (wc <= 500) return 1.8;
+    if (wc <= 800) return 2.0;
+    if (wc <= 1500) return 2.5;
+    return 3.5;
+  }
+
+  function levelMultiplier() {
+    if (!academicSelect) return 1.5;
+    if (academicSelect.value === "HIGH_SCHOOL") return 1.1;
+    if (academicSelect.value === "UNIVERSITY") return 1.5;
+    return 3.0;
+  }
+
+  function refreshPreview() {
+    if (!previewUsd || !categorySelect || !inDepth) return;
+    const base = 200;
+    const I = 1.8;
+    const U = 1.0;
+    let total = base * cecMultiplier() * levelMultiplier() * I * U;
+    if (categorySelect.value === "COLLEGE_APPLICATION") total *= 2.0;
+    if (inDepth.checked) total *= 1.5;
+    previewUsd.textContent = "$" + total.toFixed(2);
+  }
+
+  function updateFiles() {
+    if (!fileInput || !fileMeter || !fileInfo) return;
+    const files = Array.from(fileInput.files || []);
+    const total = files.reduce((n, f) => n + f.size, 0);
+    const max = 5 * 1024 * 1024;
+    const pct = Math.min(100, (total / max) * 100);
+    fileMeter.style.width = pct.toFixed(1) + "%";
+    fileInfo.textContent = files.length === 0
+      ? "No files selected."
+      : `${files.length} file(s), ${(total / (1024 * 1024)).toFixed(2)}MB / 5.00MB`;
+    fileInfo.style.color = total > max ? "#ff7d8a" : "";
+  }
+
+  if (dropzone && fileInput) {
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      fileInput.files = e.dataTransfer.files;
+      updateFiles();
+    });
+    fileInput.addEventListener("change", updateFiles);
+  }
+
+  [categorySelect, academicSelect, wordCount, inDepth].filter(Boolean).forEach(el => el.addEventListener("change", refreshPreview));
+  [wordCount].filter(Boolean).forEach(el => el.addEventListener("input", refreshPreview));
+  refreshPreview();
+
+  if (detectBtn && countrySelect) {
+    detectBtn.addEventListener("click", () => {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const tzField = document.getElementById("userTimezone");
+      if (tzField) tzField.value = tz;
+      try {
+        const locale = new Intl.Locale(navigator.language);
+        const region = locale.region;
+        const map = {
+          NG: "Nigeria", GH: "Ghana", BJ: "Benin", BF: "Burkina Faso", CV: "Cape Verde",
+          CI: "Cote d'Ivoire", GM: "Gambia", GN: "Guinea", GW: "Guinea-Bissau", LR: "Liberia",
+          ML: "Mali", NE: "Niger", SN: "Senegal", SL: "Sierra Leone", TG: "Togo",
+          KE: "Kenya", UG: "Uganda", TZ: "Tanzania", ET: "Ethiopia", ZA: "South Africa"
+        };
+        if (region && map[region]) {
+          countrySelect.value = map[region];
+        }
+      } catch (e) {}
+    });
+  }
+</script>
+</body>
+</html>
